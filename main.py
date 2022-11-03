@@ -54,7 +54,7 @@ class Window:
         self.scrollY = Scrollbar(self.main_frame, orient=HORIZONTAL, command=self.table.xview)
         self.table.configure(yscrollcommand=self.scroll.set, xscrollcommand=self.scrollY.set)
 
-        self.btn = customtkinter.CTkButton()
+        self.btn = customtkinter.CTkButton(self.main_frame)
         self.collection_table.bind("<<ListboxSelect>>", self.callback)
         self.table.bind('<<TreeviewSelect>>', self.callbackTree)
 
