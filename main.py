@@ -33,7 +33,7 @@ class Window:
         self.main_frame.pack(fill=BOTH, expand=1, side=RIGHT)
 
         self.list_box = customtkinter.CTkComboBox()
-
+        child_wind = ChildWindow(self.root, 200, 200, 'create')
         self.font = Font(size=20)
         self.collection_taken = None
 
@@ -66,6 +66,8 @@ class Window:
         self.but_update_json = Button(self.main_frame)
         self.but_add_json = Button(self.main_frame)
         self.but_insert_json = Button(self.main_frame)
+
+        self.but_add_collection = customtkinter.CTkButton(text='Add collection', command=self.add_collection)
 
         if icon:
             self.root.iconbitmap(icon)
@@ -106,9 +108,30 @@ class Window:
     def delete_json(self):
         self.but_insert_json.place_forget()
         var_no_ar = self.client[self.list_box.get()].get_collection(self.data)
-        strk = self.textJSON.get('1.0', END).split(' ')[1]
-        var_no_ar.delete_one({'_id': strk[1:len(strk) - 2]})
+        strk = self.textJSON.get('1.18', '1.42')
+        var_no_ar.delete_one({'_id': ObjectId(strk)})
         self.textJSON.place_forget()
+        self.table.delete(*self.table.get_children())
+        self.scroll.pack(side=RIGHT, fill=Y)
+        self.scrollY.pack(fill=X, side=BOTTOM)
+        # index = selection[0]
+
+        # self.data = event.widget.get(index)
+        self.table.heading('#1', text=str(self.data))
+        var = self.client[self.list_box.get()].get_collection(self.data).find()
+        print(self.client[self.list_box.get()].get_collection(self.data))
+        self.collection_table.place_forget()
+
+        for col in self.table['column']:
+            self.table.column(col, width=20000)
+        self.table.update()
+        for ind, i in enumerate(var):
+            self.table.insert('', END, values=i)
+        self.but_insert_json.configure(text="Insert", command=self.insert_json)
+        self.but_insert_json.place(x=10, y=550)
+        self.table.place(x=210, y=0, width=1000, height=1000)
+        self.table.update()
+        self.table.update()
         self.table.place(x=210, y=0, width=1000, height=1000)
         self.but_delete_json.place_forget()
 
@@ -197,10 +220,16 @@ class Window:
         self.collection_table.place(x=210, y=0, width=1000, height=1000)
         self.but_add_json.place_forget()
 
+    def add_collection(self):
+        child_wind = ChildWindow(self.root, 200, 200, 'create')
+        child_wind.draw_for_db()
+        print('ok')
+
     def mongo_connect(self):
         PanedWindow().pack(fill=BOTH)
         self.list_box.configure(values=self.client.list_database_names(), command=self.get_collection, width=200)
         self.add_DB = customtkinter.CTkButton(text='Add DB', command=self.create_db).place(x=10, y=650)
+        self.but_add_collection.place(x=10, y=620)
         self.list_box.set('Change')
         self.list_box.place(x=1, y=25)
         self.draw_combo()
