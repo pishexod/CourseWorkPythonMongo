@@ -17,8 +17,27 @@ class ChildWindow:
         self.name_db = customtkinter.CTkLabel(self.root, text='Write name DB')
         self.name_collection = customtkinter.CTkLabel(self.root, text='Write name collection')
         self.but_to_collection = customtkinter.CTkButton(self.root, text='Create', command=self.collection)
+        self.but_drop_collection = customtkinter.CTkButton(self.root, text='Drop Collection',
+                                                           command=self.drop_collection)
+        self.but_drop_db = customtkinter.CTkButton(self.root, text='Drop DB', command=self.drop_db)
         if icon:
             self.root.iconbitmap(icon)
+
+    def drop_db(self):
+        client = MongoClient('localhost', 27017)
+        client.drop_database(self.list_box.get())
+        self.root.destroy()
+
+    def drop_collection(self):
+        client = MongoClient('localhost', 27017)
+        var = client[self.list_box.get()]
+        collection = var[self.nameCollection.get()]
+        collection.drop()
+        # print(self.nameDB.get())
+        self.close_wind = True
+        # print(self.close_wind)
+        self.root.destroy()
+        # print('ok')
 
     def draw(self):
         self.name_db.configure(text='Write name DB')
@@ -27,6 +46,26 @@ class ChildWindow:
         self.name_collection.pack()
         self.nameCollection.pack()
         self.but.place(x=30, y=150)
+
+    def draw_for_drop_db(self):
+        client = MongoClient('localhost', 27017)
+        self.name_db.configure(text='Choose DB')
+        self.name_db.pack()
+        self.list_box.set('Change')
+        self.list_box.configure(values=client.list_database_names(), width=165)
+        self.but_drop_db.place(x=30, y=150)
+        self.list_box.pack()
+
+    def draw_for_drop(self):
+        client = MongoClient('localhost', 27017)
+        self.name_db.configure(text='Choose DB')
+        self.name_db.pack()
+        self.list_box.set('Change')
+        self.list_box.configure(values=client.list_database_names(), width=165)
+        self.list_box.pack()
+        self.name_collection.pack()
+        self.nameCollection.pack()
+        self.but_drop_collection.place(x=30, y=150)
 
     def draw_for_db(self):
         client = MongoClient('localhost', 27017)

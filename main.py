@@ -14,7 +14,9 @@ import sys
 import time
 from pymongo import MongoClient
 import json
-import bson
+
+
+# import bson
 
 
 class Window:
@@ -35,34 +37,35 @@ class Window:
         self.main_frame.pack(fill=BOTH, expand=1, side=RIGHT)
 
         self.list_box = customtkinter.CTkComboBox(self.main_frame)
-        child_wind = ChildWindow(self.root, 200, 200, 'create')
         self.font = Font(size=20)
         self.collection_taken = None
 
-        self.pb = ttk.Progressbar(self.main_frame, orient='horizontal', mode='determinate', length=280)
+        self.pb = customtkinter.CTkProgressBar(self.main_frame)
         self.com = Thread(target=self.sys_com)
 
         self.button = customtkinter.CTkButton(self.main_frame, text="Download", command=self.onclick, width=100,
                                               height=50)
 
-        self.textJSON = customtkinter.CTkTextbox(self.main_frame,text_font=30)
+        self.textJSON = customtkinter.CTkTextbox(self.main_frame, text_font=30)
         self.forJSON = None
 
         self.columns = '#1'
         self.table = Treeview(self.main_frame, show='headings', columns=self.columns)
 
-        self.collection_table = Listbox(self.main_frame, font=self.font)
+        self.collection_table = Listbox(self.main_frame, font=self.font, bg='#434343', fg='#C0C0C0', bd=0)
         self.scroll = customtkinter.CTkScrollbar(self.main_frame, command=self.table.yview)
         self.scrollY = customtkinter.CTkScrollbar(self.main_frame, orientation="horizontal",
                                                   command=self.table.xview)
-        self.table.configure(yscrollcommand=self.scroll.set, xscrollcommand=self.scrollY.set)
+        self.table.configure(yscrollcommand=self.scroll.set,
+                             xscrollcommand=self.scrollY.set)
 
         self.btn = customtkinter.CTkButton(self.main_frame)
         self.collection_table.bind("<<ListboxSelect>>", self.callback)
         self.table.bind('<<TreeviewSelect>>', self.callbackTree)
 
         self.style = ttk.Style(self.main_frame)
-        self.style.configure('Treeview', rowheight=70)
+        # self.style.theme_use()
+        self.style.configure('Treeview', rowheight=70, background='#434343', fieldbackground='#434343', fg='white')
 
         self.data = None
         self.but_delete_json = customtkinter.CTkButton(self.main_frame)
@@ -72,13 +75,25 @@ class Window:
 
         self.but_add_collection = customtkinter.CTkButton(self.main_frame, text='Add collection',
                                                           command=self.add_collection)
-
+        self.drop_db = customtkinter.CTkButton(self.main_frame, command=self.del_db, text='Drop DB')
+        self.drop_collection = customtkinter.CTkButton(self.main_frame, command=self.del_collection,
+                                                       text='Drop collection')
         if icon:
             self.root.iconbitmap(icon)
 
     @staticmethod
     def time_string():
         return time.strftime('%H:%M:%S')
+
+    def del_collection(self):
+        print('ok')
+        child_wind = ChildWindow(self.root, 200, 200, 'create')
+        child_wind.draw_for_drop()
+
+    def del_db(self):
+        print('ok')
+        child_wind = ChildWindow(self.root, 200, 200, 'create')
+        child_wind.draw_for_drop_db()
 
     def add_json(self):
         print(self.textJSON.textbox.get('1.0', END))
@@ -118,9 +133,6 @@ class Window:
         self.table.delete(*self.table.get_children())
         self.scroll.pack(side=RIGHT, fill=Y)
         self.scrollY.pack(side=BOTTOM, fill=X)
-        # index = selection[0]
-
-        # self.data = event.widget.get(index)
         self.table.heading('#1', text=str(self.data))
         var = self.client[self.list_box.get()].get_collection(self.data).find()
         print(self.client[self.list_box.get()].get_collection(self.data))
@@ -163,7 +175,7 @@ class Window:
         self.button.place(x=500, y=300)
 
     def sys_com(self):
-        self.pb.pack()
+        self.pb.place(x=450, y=350)
         self.pb.start()
         # os.system('curl -fsSL https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add - ; echo "deb [ '
         #           'arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | '
@@ -171,7 +183,7 @@ class Window:
         #           'mongodb-org; '
         #           'sudo systemctl start mongod.service; sudo systemctl status mongod; sudo systemctl enable mongod')
         self.pb.stop()
-        self.pb.pack_forget()
+        self.pb.place_forget()
         # self.label.pack()
         self.mongo_connect()
         # self.label.place(x=50, y=1)
@@ -220,7 +232,8 @@ class Window:
         print(self.list_box.get())
         self.collection_taken = self.client[self.list_box.get()]
         var = Variable(value=self.collection_taken.list_collection_names())
-        self.collection_table.configure(listvariable=var, width=110)
+        self.collection_table.configure(listvariable=var, width=110, borderwidth=0, highlightthickness=0, border=0,
+                                        background='#434343')
         self.collection_table.place(x=210, y=0, width=1000, height=1000)
         self.but_add_json.place_forget()
 
@@ -235,6 +248,8 @@ class Window:
         self.add_DB = customtkinter.CTkButton(self.main_frame, text='Add DB', command=self.create_db).place(x=10, y=650)
         self.but_add_collection.place(x=10, y=620)
         self.list_box.set('Change')
+        self.drop_db.place(x=10, y=100)
+        self.drop_collection.place(x=10, y=130)
         self.list_box.place(x=1, y=25)
         self.draw_combo()
 
