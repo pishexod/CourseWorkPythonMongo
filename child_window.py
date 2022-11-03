@@ -5,7 +5,7 @@ import customtkinter
 
 class ChildWindow:
     def __init__(self, parent, width, height, title="MyWindow", resizable=(False, False), icon=None):
-        self.root = Toplevel(parent)
+        self.root = customtkinter.CTkToplevel(parent)
         self.root.title(title)
         self.root.geometry(f"{width}x{height}+850+350")
         self.root.resizable(resizable[0], resizable[1])

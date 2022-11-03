@@ -23,13 +23,15 @@ class Window:
         self.dbBut = None
         self.client = MongoClient()
 
-        self.root = Tk()
+        self.root = customtkinter.CTk()
 
         self.add_DB = None
         self.root.title(title)
         self.root.geometry(f"{width}x{height}+400+150")
         self.root.resizable(resizable[0], resizable[1])
-        self.main_frame = Frame(self.root, bg='grey')
+        customtkinter.set_default_color_theme('dark-blue')
+        customtkinter.set_appearance_mode('dark')
+        self.main_frame = customtkinter.CTkFrame(self.root)
         self.main_frame.pack(fill=BOTH, expand=1, side=RIGHT)
 
         self.list_box = customtkinter.CTkComboBox(self.main_frame)
@@ -43,15 +45,16 @@ class Window:
         self.button = customtkinter.CTkButton(self.main_frame, text="Download", command=self.onclick, width=100,
                                               height=50)
 
-        self.textJSON = Text(self.main_frame)
+        self.textJSON = customtkinter.CTkTextbox(self.main_frame,text_font=30)
         self.forJSON = None
 
         self.columns = '#1'
         self.table = Treeview(self.main_frame, show='headings', columns=self.columns)
 
         self.collection_table = Listbox(self.main_frame, font=self.font)
-        self.scroll = Scrollbar(self.main_frame, orient=VERTICAL, command=self.table.yview)
-        self.scrollY = Scrollbar(self.main_frame, orient=HORIZONTAL, command=self.table.xview)
+        self.scroll = customtkinter.CTkScrollbar(self.main_frame, command=self.table.yview)
+        self.scrollY = customtkinter.CTkScrollbar(self.main_frame, orientation="horizontal",
+                                                  command=self.table.xview)
         self.table.configure(yscrollcommand=self.scroll.set, xscrollcommand=self.scrollY.set)
 
         self.btn = customtkinter.CTkButton(self.main_frame)
@@ -78,9 +81,9 @@ class Window:
         return time.strftime('%H:%M:%S')
 
     def add_json(self):
-        print(self.textJSON.get('1.0', END))
+        print(self.textJSON.textbox.get('1.0', END))
         var_no_ar = self.client[self.list_box.get()].get_collection(self.data)
-        js = self.textJSON.get('1.0', END)
+        js = self.textJSON.textbox.get('1.0', END)
         js = js.replace("'", '"')
         z = json.loads(js)
         var_no_ar.insert_one(z)
@@ -91,7 +94,7 @@ class Window:
         self.but_add_json.place(x=10, y=550)
         self.table.place_forget()
         print('ok')
-        self.textJSON.delete('1.0', END)
+        self.textJSON.textbox.delete('1.0', END)
         self.scroll.pack_forget()
         self.scrollY.pack_forget()
         self.textJSON.place(x=210, y=0, width=890, height=1000)
@@ -99,8 +102,8 @@ class Window:
     def update_json(self):
         self.but_insert_json.place_forget()
         var_no_ar = self.client[self.list_box.get()].get_collection(self.data)
-        strk = self.textJSON.get('1.18', '1.42')
-        strf = self.textJSON.get("1.0", "1.1") + self.textJSON.get('1.46', END)
+        strk = self.textJSON.textbox.get('1.18', '1.42')
+        strf = self.textJSON.textbox.get("1.0", "1.1") + self.textJSON.textbox.get('1.46', END)
         js = strf.replace("'", '"')
         z = json.loads(js)
         var_no_ar.replace_one({"_id": ObjectId(strk)}, z)
@@ -109,12 +112,12 @@ class Window:
     def delete_json(self):
         self.but_insert_json.place_forget()
         var_no_ar = self.client[self.list_box.get()].get_collection(self.data)
-        strk = self.textJSON.get('1.18', '1.42')
+        strk = self.textJSON.textbox.get('1.18', '1.42')
         var_no_ar.delete_one({'_id': ObjectId(strk)})
         self.textJSON.place_forget()
         self.table.delete(*self.table.get_children())
         self.scroll.pack(side=RIGHT, fill=Y)
-        self.scrollY.pack(fill=X, side=BOTTOM)
+        self.scrollY.pack(side=BOTTOM, fill=X)
         # index = selection[0]
 
         # self.data = event.widget.get(index)
@@ -143,11 +146,11 @@ class Window:
         self.but_delete_json.place(x=10, y=350)
         self.but_update_json.place(x=10, y=450)
         self.but_update_json.configure(text='Update', command=self.update_json)
-        self.textJSON.delete('1.0', END)
+        self.textJSON.textbox.delete('1.0', END)
         self.scroll.pack_forget()
         self.scrollY.pack_forget()
         self.forJSON = self.table.item(selection, "values")
-        self.textJSON.insert(END, self.table.item(selection, "values"))
+        self.textJSON.textbox.insert(END, self.table.item(selection, "values"))
         self.table.place_forget()
         self.textJSON.place(x=210, y=0, width=890, height=1000)
         print(self.table.item(selection, "values"))
