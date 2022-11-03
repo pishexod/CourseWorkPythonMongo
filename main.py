@@ -3,6 +3,8 @@ import re
 from tkinter.font import Font
 from tkinter.ttk import Treeview
 
+from bson import ObjectId
+
 from child_window import ChildWindow
 from tkinter import *
 from tkinter import ttk
@@ -12,6 +14,7 @@ import sys
 import time
 from pymongo import MongoClient
 import json
+import bson
 
 
 class Window:
@@ -26,7 +29,6 @@ class Window:
         self.root.title(title)
         self.root.geometry(f"{width}x{height}+400+150")
         self.root.resizable(resizable[0], resizable[1])
-
         self.main_frame = Frame(self.root, bg='grey')
         self.main_frame.pack(fill=BOTH, expand=1, side=RIGHT)
 
@@ -61,6 +63,9 @@ class Window:
 
         self.data = None
         self.but_delete_json = Button(self.main_frame)
+        self.but_update_json = Button(self.main_frame)
+        self.but_add_json = Button(self.main_frame)
+        self.but_insert_json = Button(self.main_frame)
 
         if icon:
             self.root.iconbitmap(icon)
@@ -69,18 +74,51 @@ class Window:
     def time_string():
         return time.strftime('%H:%M:%S')
 
+    def add_json(self):
+        print(self.textJSON.get('1.0', END))
+        var_no_ar = self.client[self.list_box.get()].get_collection(self.data)
+        js = self.textJSON.get('1.0', END)
+        js = js.replace("'", '"')
+        z = json.loads(js)
+        var_no_ar.insert_one(z)
+
+    def insert_json(self):
+        self.but_insert_json.place_forget()
+        self.but_add_json.configure(text='Add json', command=self.add_json)
+        self.but_add_json.place(x=10, y=550)
+        self.table.place_forget()
+        print('ok')
+        self.textJSON.delete('1.0', END)
+        self.scroll.pack_forget()
+        self.scrollY.pack_forget()
+        self.textJSON.place(x=210, y=0, width=890, height=1000)
+
+    def update_json(self):
+        self.but_insert_json.place_forget()
+        var_no_ar = self.client[self.list_box.get()].get_collection(self.data)
+        strk = self.textJSON.get('1.18', '1.42')
+        strf = self.textJSON.get("1.0", "1.1") + self.textJSON.get('1.46', END)
+        js = strf.replace("'", '"')
+        z = json.loads(js)
+        var_no_ar.replace_one({"_id": ObjectId(strk)}, z)
+        print('ok')
+
     def delete_json(self):
+        self.but_insert_json.place_forget()
         var_no_ar = self.client[self.list_box.get()].get_collection(self.data)
         strk = self.textJSON.get('1.0', END).split(' ')[1]
-        print(var_no_ar.delete_one({'_id': strk[1:len(strk) - 2]}))
+        var_no_ar.delete_one({'_id': strk[1:len(strk) - 2]})
         self.textJSON.place_forget()
         self.table.place(x=210, y=0, width=1000, height=1000)
         self.but_delete_json.place_forget()
 
     def callbackTree(self, event):
         selection = self.table.selection()[0]
+        self.but_insert_json.place_forget()
         self.but_delete_json.configure(text='Delete', command=self.delete_json)
         self.but_delete_json.place(x=10, y=350)
+        self.but_update_json.place(x=10, y=450)
+        self.but_update_json.configure(text='Update', command=self.update_json)
         self.textJSON.delete('1.0', END)
         self.scroll.pack_forget()
         self.scrollY.pack_forget()
@@ -131,7 +169,8 @@ class Window:
             self.table.update()
             for ind, i in enumerate(var):
                 self.table.insert('', END, values=i)
-
+            self.but_insert_json.configure(text="Insert", command=self.insert_json)
+            self.but_insert_json.place(x=10, y=550)
             self.table.place(x=210, y=0, width=1000, height=1000)
             self.table.update()
 
@@ -144,7 +183,9 @@ class Window:
         self.list_box.after(5000, self.draw_combo)
 
     def get_collection(self, ind):
+        self.but_insert_json.place_forget()
         self.but_delete_json.place_forget()
+        self.but_update_json.place_forget()
         self.table.place_forget()
         self.scroll.pack_forget()
         self.collection_table.configure(listvariable=None)
@@ -154,10 +195,10 @@ class Window:
         var = Variable(value=self.collection_taken.list_collection_names())
         self.collection_table.configure(listvariable=var, width=110)
         self.collection_table.place(x=210, y=0, width=1000, height=1000)
+        self.but_add_json.place_forget()
 
     def mongo_connect(self):
         PanedWindow().pack(fill=BOTH)
-
         self.list_box.configure(values=self.client.list_database_names(), command=self.get_collection, width=200)
         self.add_DB = customtkinter.CTkButton(text='Add DB', command=self.create_db).place(x=10, y=650)
         self.list_box.set('Change')
