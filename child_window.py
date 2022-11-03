@@ -10,11 +10,11 @@ class ChildWindow:
         self.root.geometry(f"{width}x{height}+850+350")
         self.root.resizable(resizable[0], resizable[1])
         self.close_wind = False
-        self.but = Button(self.root, text='Create', command=self.createCollection)
+        self.but = customtkinter.CTkButton(self.root, text='Create', command=self.createCollection)
         self.nameDB = Entry(self.root)
         self.list_box = customtkinter.CTkComboBox(self.root)
         self.nameCollection = Entry(self.root)
-        self.but_to_collection = Button(self.root, text='Create', command=self.collection)
+        self.but_to_collection = customtkinter.CTkButton(self.root, text='Create', command=self.collection)
         if icon:
             self.root.iconbitmap(icon)
 

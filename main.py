@@ -32,7 +32,7 @@ class Window:
         self.main_frame = Frame(self.root, bg='grey')
         self.main_frame.pack(fill=BOTH, expand=1, side=RIGHT)
 
-        self.list_box = customtkinter.CTkComboBox()
+        self.list_box = customtkinter.CTkComboBox(self.main_frame)
         child_wind = ChildWindow(self.root, 200, 200, 'create')
         self.font = Font(size=20)
         self.collection_taken = None
@@ -62,12 +62,13 @@ class Window:
         self.style.configure('Treeview', rowheight=70)
 
         self.data = None
-        self.but_delete_json = Button(self.main_frame)
-        self.but_update_json = Button(self.main_frame)
-        self.but_add_json = Button(self.main_frame)
-        self.but_insert_json = Button(self.main_frame)
+        self.but_delete_json = customtkinter.CTkButton(self.main_frame)
+        self.but_update_json = customtkinter.CTkButton(self.main_frame)
+        self.but_add_json = customtkinter.CTkButton(self.main_frame)
+        self.but_insert_json = customtkinter.CTkButton(self.main_frame)
 
-        self.but_add_collection = customtkinter.CTkButton(text='Add collection', command=self.add_collection)
+        self.but_add_collection = customtkinter.CTkButton(self.main_frame, text='Add collection',
+                                                          command=self.add_collection)
 
         if icon:
             self.root.iconbitmap(icon)
@@ -228,7 +229,7 @@ class Window:
     def mongo_connect(self):
         PanedWindow().pack(fill=BOTH)
         self.list_box.configure(values=self.client.list_database_names(), command=self.get_collection, width=200)
-        self.add_DB = customtkinter.CTkButton(text='Add DB', command=self.create_db).place(x=10, y=650)
+        self.add_DB = customtkinter.CTkButton(self.main_frame, text='Add DB', command=self.create_db).place(x=10, y=650)
         self.but_add_collection.place(x=10, y=620)
         self.list_box.set('Change')
         self.list_box.place(x=1, y=25)
