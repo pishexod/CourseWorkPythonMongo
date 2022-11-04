@@ -52,6 +52,8 @@ class Window:
         self.columns = '#1'
         self.table = Treeview(self.main_frame, show='headings', columns=self.columns)
 
+        self.banner = customtkinter.CTkLabel(text='Select DB', text_font=20)
+
         self.collection_table = Listbox(self.main_frame, font=self.font, bg='#434343', fg='#C0C0C0', bd=0)
         self.scroll = customtkinter.CTkScrollbar(self.main_frame, command=self.table.yview)
         self.scrollY = customtkinter.CTkScrollbar(self.main_frame, orientation="horizontal",
@@ -60,12 +62,13 @@ class Window:
                              xscrollcommand=self.scrollY.set)
 
         self.btn = customtkinter.CTkButton(self.main_frame)
-        self.collection_table.bind("<<ListboxSelect>>", self.callback)
+        self.collection_table.bind("<Double-1>", self.callback)
         self.table.bind('<<TreeviewSelect>>', self.callbackTree)
 
         self.style = ttk.Style(self.main_frame)
         # self.style.theme_use()
-        self.style.configure('Treeview', rowheight=70, background='#434343', fieldbackground='#434343', fg='white')
+        self.style.configure('Treeview', rowheight=70, background='#434343', fieldbackground='#434343',
+                             foreground='white')
 
         self.data = None
         self.but_delete_json = customtkinter.CTkButton(self.main_frame)
@@ -78,12 +81,39 @@ class Window:
         self.drop_db = customtkinter.CTkButton(self.main_frame, command=self.del_db, text='Drop DB')
         self.drop_collection = customtkinter.CTkButton(self.main_frame, command=self.del_collection,
                                                        text='Drop collection')
+
+        self.img = PhotoImage(file='/home/pishexod/PycharmProjects/OS/img/icons8-back-arrow-30.png', width=30,
+                              height=30)
+        self.but_back = customtkinter.CTkButton(self.main_frame, command=self.back_def, text='', image=self.img,
+                                                height=20, width=20)
+        self.but_back_for_table = customtkinter.CTkButton(self.main_frame, image=self.img, text='', height=20, width=20,
+                                                          command=self.back_def_for_table)
         if icon:
             self.root.iconbitmap(icon)
 
     @staticmethod
     def time_string():
         return time.strftime('%H:%M:%S')
+
+    def back_def_for_table(self):
+        self.collection_table.update()
+        self.but_back_for_table.place_forget()
+        self.but_insert_json.place_forget()
+        self.but_delete_json.place_forget()
+        self.but_update_json.pack_forget()
+        self.but_add_json.place_forget()
+        self.collection_table.place(x=210, y=0, width=1000, height=1000)
+        self.table.place_forget()
+
+    def back_def(self):
+        self.table.update()
+        self.but_back_for_table.place(x=175, y=98)
+        self.but_back.place_forget()
+        self.but_update_json.place_forget()
+        self.but_delete_json.place_forget()
+        self.but_insert_json.place(x=30, y=550)
+        self.textJSON.place_forget()
+        self.table.place(x=210, y=0, width=1000, height=1000)
 
     def del_collection(self):
         print('ok')
@@ -104,11 +134,12 @@ class Window:
         var_no_ar.insert_one(z)
 
     def insert_json(self):
+        self.but_back_for_table.place_forget()
+        self.but_back.place(x=175, y=98)
         self.but_insert_json.place_forget()
         self.but_add_json.configure(text='Add json', command=self.add_json)
-        self.but_add_json.place(x=10, y=550)
+        self.but_add_json.place(x=30, y=550)
         self.table.place_forget()
-        print('ok')
         self.textJSON.textbox.delete('1.0', END)
         self.scroll.pack_forget()
         self.scrollY.pack_forget()
@@ -155,16 +186,18 @@ class Window:
         selection = self.table.selection()[0]
         self.but_insert_json.place_forget()
         self.but_delete_json.configure(text='Delete', command=self.delete_json)
-        self.but_delete_json.place(x=10, y=350)
-        self.but_update_json.place(x=10, y=450)
+        self.but_delete_json.place(x=30, y=350)
+        self.but_update_json.place(x=30, y=450)
         self.but_update_json.configure(text='Update', command=self.update_json)
         self.textJSON.textbox.delete('1.0', END)
         self.scroll.pack_forget()
         self.scrollY.pack_forget()
         self.forJSON = self.table.item(selection, "values")
         self.textJSON.textbox.insert(END, self.table.item(selection, "values"))
+        self.but_back_for_table.place_forget()
         self.table.place_forget()
         self.textJSON.place(x=210, y=0, width=890, height=1000)
+        self.but_back.place(x=175, y=98)
         print(self.table.item(selection, "values"))
 
     def progress(self):
@@ -184,9 +217,7 @@ class Window:
         #           'sudo systemctl start mongod.service; sudo systemctl status mongod; sudo systemctl enable mongod')
         self.pb.stop()
         self.pb.place_forget()
-        # self.label.pack()
         self.mongo_connect()
-        # self.label.place(x=50, y=1)
         sys.exit()
 
     def callback(self, event):
@@ -209,8 +240,9 @@ class Window:
             for ind, i in enumerate(var):
                 self.table.insert('', END, values=i)
             self.but_insert_json.configure(text="Insert", command=self.insert_json)
-            self.but_insert_json.place(x=10, y=550)
+            self.but_insert_json.place(x=30, y=550)
             self.table.place(x=210, y=0, width=1000, height=1000)
+            self.but_back_for_table.place(x=175, y=98)
             self.table.update()
 
     def create_db(self):
@@ -222,6 +254,8 @@ class Window:
         self.list_box.after(5000, self.draw_combo)
 
     def get_collection(self, ind):
+        self.but_back_for_table.place_forget()
+        self.but_back.place_forget()
         self.but_insert_json.place_forget()
         self.but_delete_json.place_forget()
         self.but_update_json.place_forget()
@@ -229,7 +263,7 @@ class Window:
         self.scroll.pack_forget()
         self.collection_table.configure(listvariable=None)
         self.collection_table.pack()
-        print(self.list_box.get())
+        self.banner.place_forget()
         self.collection_taken = self.client[self.list_box.get()]
         var = Variable(value=self.collection_taken.list_collection_names())
         self.collection_table.configure(listvariable=var, width=110, borderwidth=0, highlightthickness=0, border=0,
@@ -245,11 +279,12 @@ class Window:
     def mongo_connect(self):
         PanedWindow().pack(fill=BOTH)
         self.list_box.configure(values=self.client.list_database_names(), command=self.get_collection, width=200)
-        self.add_DB = customtkinter.CTkButton(self.main_frame, text='Add DB', command=self.create_db).place(x=10, y=650)
-        self.but_add_collection.place(x=10, y=620)
+        self.add_DB = customtkinter.CTkButton(self.main_frame, text='Add DB', command=self.create_db).place(x=30, y=650)
+        self.but_add_collection.place(x=30, y=620)
+        self.banner.place(x=600, y=300)
         self.list_box.set('Change')
-        self.drop_db.place(x=10, y=100)
-        self.drop_collection.place(x=10, y=130)
+        self.drop_db.place(x=30, y=100)
+        self.drop_collection.place(x=30, y=130)
         self.list_box.place(x=1, y=25)
         self.draw_combo()
 
